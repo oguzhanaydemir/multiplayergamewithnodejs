@@ -25,17 +25,17 @@
         name : "O"
 
        }
-
+       var enemyList ={};
        //enemy
        var enemy = {
         x : 150,
         spdX : 10,
         y : 350,
         spdY : 15,
-        name : "D"
-
+        name : "D",
+        id:"E1"
        }
-
+       enemyList["E1"] = enemy;
        //enemy2
 
        var enemy2 = {
@@ -43,12 +43,22 @@
         spdX : 10,
         y : 350,
         spdY : -15,
-        name : "D"
-
+        name : "D",
+        id:"E2"
        }
-       
+       enemyList["E2"] = enemy2;
+      
+       var enemy3 = {
+        x : 100,
+        spdX : 10,
+        y : 200,
+        spdY : -35,
+        name : "D",
+        id:"E3"
+       }
+       enemyList["E3"] = enemy3;
 
-        setInterval(Update, 30);
+       setInterval(Update, 50);
 
     function UpdateEntity(entity){
          //player updating
@@ -69,8 +79,9 @@
     function Update(){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         UpdateEntity(player);
-        UpdateEntity(enemy);  
-        UpdateEntity(enemy2);  
+       for(var key in enemyList){
+           UpdateEntity(enemyList[key]);
+       }
     }
 </script>
 </body>
