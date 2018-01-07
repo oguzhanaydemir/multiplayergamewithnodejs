@@ -32,6 +32,21 @@
        CreateEnemy("E2", "D", 250, 350, 10, -15);
        CreateEnemy("E3", "D", 100, 200, 10, -35);
 
+       //get distance between player and enemy
+
+       function GetDistanceBetweenEntity(entity1, entity2){
+           var vx = entity1.x - entity2.x;
+           var vy = entity1.y - entity2.y;
+
+           return Math.sqrt(vx*vx + vy*vy);
+       }
+
+       function TestCollisionEntity(entity1, entity2){
+            var distance = GetDistanceBetweenEntity(entity1, entity2);
+            return distance<30;
+       }
+
+       //Create Enemy
        function CreateEnemy(id, name, x, y, spdX, spdY){
         var enemy = {
         id:id,
@@ -64,10 +79,16 @@
 
     function Update(){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
-        UpdateEntity(player);
        for(var key in enemyList){
            UpdateEntity(enemyList[key]);
+
+           var isColliding = TestCollisionEntity(player, enemyList[key]);
+
+           if(isColliding){
+               console.log('Colliding');
+           }
        }
+        UpdateEntity(player);
     }
 </script>
 </body>
