@@ -25,38 +25,24 @@
         name : "O"
 
        }
-       var enemyList ={};
        //enemy
-       var enemy = {
-        x : 150,
-        spdX : 10,
-        y : 350,
-        spdY : 15,
-        name : "D",
-        id:"E1"
-       }
-       enemyList["E1"] = enemy;
-       //enemy2
+       var enemyList ={};
 
-       var enemy2 = {
-        x : 250,
-        spdX : 10,
-        y : 350,
-        spdY : -15,
-        name : "D",
-        id:"E2"
+       CreateEnemy("E1", "D", 150, 350, 10, 15);
+       CreateEnemy("E2", "D", 250, 350, 10, -15);
+       CreateEnemy("E3", "D", 100, 200, 10, -35);
+
+       function CreateEnemy(id, name, x, y, spdX, spdY){
+        var enemy = {
+        id:id,
+        name : name,
+        x : x,
+        y : y,
+        spdX : spdX,
+        spdY : spdY
        }
-       enemyList["E2"] = enemy2;
-      
-       var enemy3 = {
-        x : 100,
-        spdX : 10,
-        y : 200,
-        spdY : -35,
-        name : "D",
-        id:"E3"
+       enemyList[id] = enemy;
        }
-       enemyList["E3"] = enemy3;
 
        setInterval(Update, 50);
 
