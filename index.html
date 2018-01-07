@@ -13,7 +13,9 @@
 
         const HEIGHT = 500;
         const WIDTH = 500;
-
+        const HEALTH = 10;
+        
+        var timeWhenGameStarted = Date.now();
         var ctx = document.getElementById("ctx").getContext('2d');
         ctx.font='30px Arial';
        //player
@@ -22,32 +24,31 @@
         spdX : 30,
         y : 40,
         spdY : 5,
-        name : "O"
+        name : "O",
+        hp:HEALTH
 
        }
        //enemy
        var enemyList ={};
 
-       CreateEnemy("E1", "D", 150, 350, 10, 15);
-       CreateEnemy("E2", "D", 250, 350, 10, -15);
-       CreateEnemy("E3", "D", 100, 200, 10, -35);
+       
 
        //get distance between player and enemy
 
-       function GetDistanceBetweenEntity(entity1, entity2){
+       GetDistanceBetweenEntity = function (entity1, entity2){
            var vx = entity1.x - entity2.x;
            var vy = entity1.y - entity2.y;
 
            return Math.sqrt(vx*vx + vy*vy);
        }
 
-       function TestCollisionEntity(entity1, entity2){
+       TestCollisionEntity = function (entity1, entity2){
             var distance = GetDistanceBetweenEntity(entity1, entity2);
             return distance<30;
        }
 
        //Create Enemy
-       function CreateEnemy(id, name, x, y, spdX, spdY){
+       CreateEnemy = function (id, name, x, y, spdX, spdY){
         var enemy = {
         id:id,
         name : name,
@@ -59,13 +60,27 @@
        enemyList[id] = enemy;
        }
 
-       setInterval(Update, 50);
+       document.onmousemove = function(mouse){
+           var mouseX = mouse.clientX;
+           var mouseY = mouse.clientY;
 
-    function UpdateEntity(entity){
-         //player updating
-         entity.x+= entity.spdX;
-        entity.y+= entity.spdY;
+           player.x = mouseX;
+           player.y = mouseY;
+       }
+
+
+       UpdateEntity = function (entity){
+         DrawEntity(entity);
+         UpdateEntityPosition(entity);
+    }
+
+    DrawEntity = function(entity){
         ctx.fillText(entity.name,entity.x, entity.y);
+    }
+
+    UpdateEntityPosition = function(entity){
+        entity.x+= entity.spdX;
+        entity.y+= entity.spdY;
 
         if( entity.x > WIDTH || entity.x < 0){
             entity.spdX = -entity.spdX;
@@ -74,10 +89,9 @@
            entity. spdY = -entity.spdY;
         }
     }
-
     
 
-    function Update(){
+    Update = function (){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
        for(var key in enemyList){
            UpdateEntity(enemyList[key]);
@@ -85,11 +99,25 @@
            var isColliding = TestCollisionEntity(player, enemyList[key]);
 
            if(isColliding){
-               console.log('Colliding');
+                player.hp -= 1;
+                if(player.hp<=0){
+                    var timeSurvived = Date.now() - timeWhenGameStarted; 
+                    alert('GAME OVER.\nSCORE :' + timeSurvived + " ms.");
+                    timeWhenGameStarted = Date.now();
+                    player.hp = HEALTH;
+                }
            }
        }
-        UpdateEntity(player);
+        DrawEntity(player);
+        ctx.fillText(player.hp + " Hp", 0, 30);
     }
+
+       CreateEnemy("E1", "D", 150, 350, 10, 15);
+       CreateEnemy("E2", "D", 250, 350, 10, -15);
+       CreateEnemy("E3", "D", 100, 200, 10, -35);
+       
+       setInterval(Update, 50);
+
 </script>
 </body>
 </html>
