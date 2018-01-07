@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Browser Game</title>
+</head>
+<body>
+    <canvas id="ctx" width="500" height="500" style="border:1px solid black;"></canvas>
+
+<script>
+
+        const HEIGHT = 500;
+        const WIDTH = 500;
+
+        var ctx = document.getElementById("ctx").getContext('2d');
+        ctx.font='30px Arial';
+       //player
+       var player = {
+        x : 50,
+        spdX : 30,
+        y : 40,
+        spdY : 5,
+        name : "O"
+
+       }
+
+       //enemy
+       var enemy = {
+        x : 150,
+        spdX : 10,
+        y : 350,
+        spdY : 15,
+        name : "D"
+
+       }
+
+       //enemy2
+
+       var enemy2 = {
+        x : 250,
+        spdX : 10,
+        y : 350,
+        spdY : -15,
+        name : "D"
+
+       }
+       
+
+        setInterval(Update, 30);
+
+    function UpdateEntity(entity){
+         //player updating
+         entity.x+= entity.spdX;
+        entity.y+= entity.spdY;
+        ctx.fillText(entity.name,entity.x, entity.y);
+
+        if( entity.x > WIDTH || entity.x < 0){
+            entity.spdX = -entity.spdX;
+        }
+        if( entity.y > HEIGHT || entity.y<0){
+           entity. spdY = -entity.spdY;
+        }
+    }
+
+    
+
+    function Update(){
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        UpdateEntity(player);
+        UpdateEntity(enemy);  
+        UpdateEntity(enemy2);  
+    }
+</script>
+</body>
+</html>
