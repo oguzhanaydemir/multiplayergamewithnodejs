@@ -27,7 +27,6 @@
         spdX : 30,
         y : 40,
         spdY : 5,
-        name : "O",
         hp:HEALTH,
         width : playerwidth,
         height : playerHeight,
@@ -71,7 +70,6 @@
        CreateEnemy = function (id, name, x, y, spdX, spdY, width, height){
         var enemy = {
         id:id,
-        name : name,
         x : x,
         y : y,
         spdX : spdX,
@@ -84,15 +82,15 @@
        }
 
        document.onmousemove = function(mouse){
-           var mouseX = mouse.clientX;
-           var mouseY = mouse.clientY;
+           var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
+           var mouseY = mouse.clientY - document.getElementById('ctx').getBoundingClientRect().top;
 
            player.x = mouseX;
            player.y = mouseY;
        }
 
 
-       UpdateEntity = function (entity){
+         UpdateEntity = function (entity){
          UpdateEntityPosition(entity);
          DrawEntity(entity);
     }
@@ -151,8 +149,8 @@
     }
 
        CreateEnemy("E1", "D", 150, 350, 10, 15, 30, 30);
-       CreateEnemy("E2", "D", 250, 350, 10, -15, 20, 20);
-       CreateEnemy("E3", "D", 100, 200, 10, -35, 10, 70);
+       CreateEnemy("E2", "D", 250, 350, 10, -15, 30, 30);
+       CreateEnemy("E3", "D", 100, 200, 10, -35, 30, 30);
        
        setInterval(Update, 50);
 
