@@ -41,7 +41,7 @@
         var enemyList ={};
 
         var frameCount = 0;
-       
+        var score = 0;
 
        //get distance between player and enemy
 
@@ -149,6 +149,7 @@
     Update = function (){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         frameCount++;
+        score++;
 
         if(frameCount % 100 === 0){
             RandomlyGenerateEnemy();
@@ -169,6 +170,7 @@
        }
        DrawEntity(player);
         ctx.fillText(player.hp + " Hp", 0, 30);
+        ctx.fillText("Score :" + score, 200, 30);
     }
     StartNewGame = function(){
         timeWhenGameStarted = Date.now();
