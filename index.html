@@ -15,6 +15,9 @@
         const WIDTH = 500;
         const HEALTH = 10;
         
+        var playerwidth = 20;
+        var playerHeight = 20;
+        
         var timeWhenGameStarted = Date.now();
         var ctx = document.getElementById("ctx").getContext('2d');
         ctx.font='30px Arial';
@@ -25,8 +28,10 @@
         y : 40,
         spdY : 5,
         name : "O",
-        hp:HEALTH
-
+        hp:HEALTH,
+        width : playerwidth,
+        height : playerHeight,
+        color: "green"
        }
        //enemy
        var enemyList ={};
@@ -43,19 +48,37 @@
        }
 
        TestCollisionEntity = function (entity1, entity2){
-            var distance = GetDistanceBetweenEntity(entity1, entity2);
-            return distance<30;
+            var rect1 = {
+                x:entity1.x-entity1.width/2,
+                y:entity1.y-entity1.height/2,
+                width:entity1.width,
+                height:entity1.height
+            }
+
+            var rect2 = {
+                x:entity2.x-entity2.width/2,
+                y:entity2.y-entity2.height/2,
+                width:entity2.width,
+                height:entity2.height
+            }
+
+            return TestCollisionRectRect(rect1, rect2);
        }
 
+       
+
        //Create Enemy
-       CreateEnemy = function (id, name, x, y, spdX, spdY){
+       CreateEnemy = function (id, name, x, y, spdX, spdY, width, height){
         var enemy = {
         id:id,
         name : name,
         x : x,
         y : y,
         spdX : spdX,
-        spdY : spdY
+        spdY : spdY,
+        width : width,
+        height : height,
+        color:"red"
        }
        enemyList[id] = enemy;
        }
@@ -70,13 +93,28 @@
 
 
        UpdateEntity = function (entity){
-         DrawEntity(entity);
          UpdateEntityPosition(entity);
+         DrawEntity(entity);
     }
 
+   
+    TestCollisionRectRect = function(rect1, rect2){
+           return    rect1.x <= rect2.x + rect2.width
+                  && rect2.x <= rect1.x + rect1.width
+                  && rect1.y <= rect2.y + rect2.height
+                  && rect2.y <= rect1.y + rect1.height; 
+       }
+
+
+
     DrawEntity = function(entity){
-        ctx.fillText(entity.name,entity.x, entity.y);
+        ctx.save();
+        ctx.fillStyle = entity.color;
+        ctx.fillRect(entity.x-entity.width/2, entity.y-entity.height/2, entity.width, entity.height);
+        ctx.restore();
     }
+
+   
 
     UpdateEntityPosition = function(entity){
         entity.x+= entity.spdX;
@@ -108,13 +146,13 @@
                 }
            }
        }
-        DrawEntity(player);
+       DrawEntity(player);
         ctx.fillText(player.hp + " Hp", 0, 30);
     }
 
-       CreateEnemy("E1", "D", 150, 350, 10, 15);
-       CreateEnemy("E2", "D", 250, 350, 10, -15);
-       CreateEnemy("E3", "D", 100, 200, 10, -35);
+       CreateEnemy("E1", "D", 150, 350, 10, 15, 30, 30);
+       CreateEnemy("E2", "D", 250, 350, 10, -15, 20, 20);
+       CreateEnemy("E3", "D", 100, 200, 10, -35, 10, 70);
        
        setInterval(Update, 50);
 
