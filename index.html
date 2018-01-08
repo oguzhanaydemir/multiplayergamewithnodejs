@@ -14,13 +14,18 @@
         const HEIGHT = 500;
         const WIDTH = 500;
         const HEALTH = 10;
+        const MILISECOND = 1000;
         
         var playerWidth = 20;
         var playerHeight = 20;
         
         var timeWhenGameStarted = Date.now();
+        
         var ctx = document.getElementById("ctx").getContext('2d');
+        
         ctx.font='30px Arial';
+
+
        //player
        var player = {
         x : 50,
@@ -33,8 +38,9 @@
         color: "green"
        }
        //enemy
-       var enemyList ={};
+        var enemyList ={};
 
+        var frameCount = 0;
        
 
        //get distance between player and enemy
@@ -67,7 +73,7 @@
        
 
        //Create Enemy
-       CreateEnemy = function (id, name, x, y, spdX, spdY, width, height){
+       CreateEnemy = function (id, x, y, spdX, spdY, width, height){
         var enemy = {
         id:id,
         x : x,
@@ -131,10 +137,10 @@
         entity.x+= entity.spdX;
         entity.y+= entity.spdY;
 
-        if( entity.x > WIDTH - entity.width || entity.x < entity.width){
+        if( entity.x > WIDTH  || entity.x < 0){
             entity.spdX = -entity.spdX;
         }
-        if( entity.y > HEIGHT - entity.height || entity.y< entity.height){
+        if( entity.y > HEIGHT  || entity.y< 0){
            entity. spdY = -entity.spdY;
         }
     }
@@ -142,6 +148,11 @@
 
     Update = function (){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        frameCount++;
+
+        if(frameCount % 100 === 0){
+            RandomlyGenerateEnemy();
+         }
        for(var key in enemyList){
            UpdateEntity(enemyList[key]);
 
@@ -151,21 +162,38 @@
                 player.hp -= 1;
                 if(player.hp<=0){
                     var timeSurvived = Date.now() - timeWhenGameStarted; 
-                    alert('GAME OVER.\nSCORE :' + timeSurvived + " ms.");
-                    timeWhenGameStarted = Date.now();
-                    player.hp = HEALTH;
+                    console.log('GAME OVER.\nSCORE :' + timeSurvived + " ms.");
+                    StartNewGame();
                 }
            }
        }
        DrawEntity(player);
         ctx.fillText(player.hp + " Hp", 0, 30);
     }
+    StartNewGame = function(){
+        timeWhenGameStarted = Date.now();
+        player.hp = HEALTH;
+        frameCount = 0;
+        enemyList={};
+        RandomlyGenerateEnemy();
+        RandomlyGenerateEnemy();
+        RandomlyGenerateEnemy();
+    }
+    RandomlyGenerateEnemy = function(){
 
-       CreateEnemy("E1", "D", 150, 350, 10, 15, 30, 30);
-       CreateEnemy("E2", "D", 250, 350, 10, -15, 30, 30);
-       CreateEnemy("E3", "D", 100, 200, 10, -35, 30, 30);
+        var id = Math.random();
+        var x = Math.random() * WIDTH/2;
+        var y = Math.random() * HEIGHT/2;
+        var spdX = 5 + Math.random()*5;
+        var spdY = 5 + Math.random()*5;
+        var width = 10 + Math.random()*30;
+        var height = 10 + Math.random()*30;
+
+        CreateEnemy(id, x, y, spdX, spdY, width, height);
+    }
        
-       setInterval(Update, 50);
+       StartNewGame();
+       setInterval(Update, 40);
 
 </script>
 </body>
