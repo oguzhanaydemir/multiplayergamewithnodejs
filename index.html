@@ -15,7 +15,7 @@
         const WIDTH = 500;
         const HEALTH = 10;
         
-        var playerwidth = 20;
+        var playerWidth = 20;
         var playerHeight = 20;
         
         var timeWhenGameStarted = Date.now();
@@ -28,7 +28,7 @@
         y : 40,
         spdY : 5,
         hp:HEALTH,
-        width : playerwidth,
+        width : playerWidth,
         height : playerHeight,
         color: "green"
        }
@@ -85,6 +85,19 @@
            var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
            var mouseY = mouse.clientY - document.getElementById('ctx').getBoundingClientRect().top;
 
+            if(mouseX < player.width/2){
+                mouseX=player.width/2;
+            }
+            if(mouseX>WIDTH - player.width/2){
+                mouseX = WIDTH - player.width/2;
+            }
+            if(mouseY < player.height/2){
+                mouseY = player.height/2;
+            }
+            if(mouseY>HEIGHT-player.height/2){
+                mouseY = HEIGHT - player.height/2;
+            }
+
            player.x = mouseX;
            player.y = mouseY;
        }
@@ -118,10 +131,10 @@
         entity.x+= entity.spdX;
         entity.y+= entity.spdY;
 
-        if( entity.x > WIDTH || entity.x < 0){
+        if( entity.x > WIDTH - entity.width || entity.x < entity.width){
             entity.spdX = -entity.spdX;
         }
-        if( entity.y > HEIGHT || entity.y<0){
+        if( entity.y > HEIGHT - entity.height || entity.y< entity.height){
            entity. spdY = -entity.spdY;
         }
     }
