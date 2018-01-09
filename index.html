@@ -39,6 +39,8 @@
        }
        //enemy
         var enemyList ={};
+        var upgradeList ={};
+        var bulletList ={};
 
         var frameCount = 0;
         var score = 0;
@@ -74,17 +76,49 @@
 
        //Create Enemy
        CreateEnemy = function (id, x, y, spdX, spdY, width, height){
-        var enemy = {
-        id:id,
-        x : x,
-        y : y,
-        spdX : spdX,
-        spdY : spdY,
-        width : width,
-        height : height,
-        color:"red"
+            var enemy = {
+                id:id,
+                x : x,
+                y : y,
+                spdX : spdX,
+                spdY : spdY,
+                width : width,
+                height : height,
+                color:"red"
+            }
+        enemyList[id] = enemy;
        }
-       enemyList[id] = enemy;
+
+       //Create Upgrade
+
+       CreateUpgrade = function (id, x, y, spdX, spdY, width, height){
+            var upgrade = {
+                id:id,
+                x : x,
+                y : y,
+                spdX : spdX,
+                spdY : spdY,
+                width : width,
+                height : height,
+                color:"blue"
+            }
+            
+            upgradeList[id] = upgrade;
+       }
+
+       CreateBullet = function (id, x, y, spdX, spdY, width, height){
+            var bullet = {
+                id:id,
+                x : x,
+                y : y,
+                spdX : spdX,
+                spdY : spdY,
+                width : width,
+                height : height,
+                color:"black"
+            }
+            
+            bulletList[id] = bullet;
        }
 
        document.onmousemove = function(mouse){
@@ -146,6 +180,49 @@
     }
     
 
+     //Random Enenmy
+    RandomlyGenerateEnemy = function(){
+
+            var id = Math.random();
+            var x = Math.random() * WIDTH/2;
+            var y = Math.random() * HEIGHT/2;
+            var spdX = 5 + Math.random()*5;
+            var spdY = 5 + Math.random()*5;
+            var width = 10 + Math.random()*30;
+            var height = 10 + Math.random()*30;
+
+            CreateEnemy(id, x, y, spdX, spdY, width, height);
+    }
+
+    //Random Upgrade
+
+    RandomlyGenerateUpgrade = function(){
+
+        var id = Math.random();
+        var x = Math.random() * WIDTH/2;
+        var y = Math.random() * HEIGHT/2;
+        var spdX = 0;
+        var spdY = 0;
+        var width = 10;
+        var height = 10;
+
+        CreateUpgrade(id, x, y, spdX, spdY, width, height);
+    }
+
+    RandomlyGenerateBullet = function(){
+        var angle = Math.random()*360;
+        var id = Math.random();
+        var x = player.x;
+        var y = player.y;
+        var spdX = Math.cos(angle/180*Math.PI)*5;
+        var spdY =Math.sin(angle/180*Math.PI)*5;
+        var width = 10;
+        var height = 10;
+
+        CreateBullet(id, x, y, spdX, spdY, width, height);
+    }
+   
+
     Update = function (){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         frameCount++;
@@ -153,8 +230,33 @@
 
         if(frameCount % 100 === 0){
             RandomlyGenerateEnemy();
-         }
-       for(var key in enemyList){
+        }
+
+        if(frameCount % 75 === 0){
+            RandomlyGenerateUpgrade();
+        
+        }
+
+
+        if(frameCount % 25 === 0){
+            RandomlyGenerateBullet();
+        }
+
+        for(var key in bulletList){
+            UpdateEntity(bulletList[key]);
+        }
+
+        for(var key in upgradeList){
+            UpdateEntity(upgradeList[key]);
+            var isColliding = TestCollisionEntity(player, upgradeList[key]);
+
+            if(isColliding){
+                score += 1000;
+                delete upgradeList[key];
+            }
+        }
+
+        for(var key in enemyList){
            UpdateEntity(enemyList[key]);
 
            var isColliding = TestCollisionEntity(player, enemyList[key]);
@@ -177,22 +279,14 @@
         player.hp = HEALTH;
         frameCount = 0;
         enemyList={};
+        upgradeList={};
+        bulletList={};
         RandomlyGenerateEnemy();
         RandomlyGenerateEnemy();
         RandomlyGenerateEnemy();
     }
-    RandomlyGenerateEnemy = function(){
 
-        var id = Math.random();
-        var x = Math.random() * WIDTH/2;
-        var y = Math.random() * HEIGHT/2;
-        var spdX = 5 + Math.random()*5;
-        var spdY = 5 + Math.random()*5;
-        var width = 10 + Math.random()*30;
-        var height = 10 + Math.random()*30;
-
-        CreateEnemy(id, x, y, spdX, spdY, width, height);
-    }
+   
        
        StartNewGame();
        setInterval(Update, 40);
