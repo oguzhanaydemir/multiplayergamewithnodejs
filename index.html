@@ -41,8 +41,8 @@
             pressingDown : false,
             pressingUp : false,
             pressingLeft : false,
-            pressingRight : false
-       }
+            pressingRight : false,
+            aimAngle : 0       }
        //enemy
         var enemyList ={};
         var upgradeList ={};
@@ -131,30 +131,30 @@
        
        document.onclick = function(mouse){
         if(player.attackCounter > 25){
-            RandomlyGenerateBullet();
+            RandomlyGenerateBullet(player);
             player.attackCounter = 0;
         }
     }
 
+       document.oncontextmenu = function(mouse){
+
+            if(player.attackCounter > 50){
+                for(var angle = 0; angle < 360; angle++){
+                    RandomlyGenerateBullet(player, angle);
+                }
+            }
+            mouse.preventDefault();
+       }
+
        document.onmousemove = function(mouse){
-           /*var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
+           var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
            var mouseY = mouse.clientY - document.getElementById('ctx').getBoundingClientRect().top;
+           
+            mouseX -= player.x;
+            mouseY -= player.y;
 
-            if(mouseX < player.width/2){
-                mouseX=player.width/2;
-            }
-            if(mouseX>WIDTH - player.width/2){
-                mouseX = WIDTH - player.width/2;
-            }
-            if(mouseY < player.height/2){
-                mouseY = player.height/2;
-            }
-            if(mouseY>HEIGHT-player.height/2){
-                mouseY = HEIGHT - player.height/2;
-            }
-
-           player.x = mouseX;
-           player.y = mouseY;*/
+           player.aimAngle = Math.atan2(mouseY / mouseX) / Math.PI * 180;
+           
     }
 
        document.onkeydown = function(event){
@@ -291,11 +291,14 @@
         CreateUpgrade(id, x, y, spdX, spdY, width, height, color, category);
     }
 
-    RandomlyGenerateBullet = function(){
-        var angle = Math.random()*360;
+    RandomlyGenerateBullet = function(actor, overwriteAngle){
+        var angle = actor.aimAngle;
+        if(overwriteAngle !== undefined){
+            angle = overwriteAngle;
+        }
         var id = Math.random();
-        var x = player.x;
-        var y = player.y;
+        var x = actor.x;
+        var y = actor.y;
         var spdX = Math.cos(angle/180*Math.PI)*5;
         var spdY =Math.sin(angle/180*Math.PI)*5;
         var width = 10;
