@@ -14,18 +14,19 @@
         const HEIGHT = 500;
         const WIDTH = 500;
         const HEALTH = 10;
-        const MILISECOND = 1000;
         
         var playerWidth = 20;
         var playerHeight = 20;
-        
+        var playerSpeed = 10;
         var timeWhenGameStarted = Date.now();
         
         var ctx = document.getElementById("ctx").getContext('2d');
         
         ctx.font='30px Arial';
 
-
+        var frameCount = 0;
+        var score = 0;
+      
        //player
        var player = {
             x : 50,
@@ -43,13 +44,13 @@
             pressingLeft : false,
             pressingRight : false,
             aimAngle : 0       }
-       //enemy
+      
+       
         var enemyList ={};
         var upgradeList ={};
         var bulletList ={};
 
-        var frameCount = 0;
-        var score = 0;
+        
 
        //get distance between player and enemy
 
@@ -82,7 +83,7 @@
 
        //Create Enemy
        CreateEnemy = function (id, x, y, spdX, spdY, width, height){
-            var enemy = {
+            var enemy = {   
                 id:id,
                 x : x,
                 y : y,
@@ -95,167 +96,8 @@
         enemyList[id] = enemy;
        }
 
-       //Create Upgrade
-
-       CreateUpgrade = function (id, x, y, spdX, spdY, width, height, color, category){
-            var upgrade = {
-                id:id,
-                x : x,
-                y : y,
-                spdX : spdX,
-                spdY : spdY,
-                width : width,
-                height : height,
-                color: color,
-                category:category
-            }
-            
-            upgradeList[id] = upgrade;
-       }
-
-       CreateBullet = function (id, x, y, spdX, spdY, width, height){
-            var bullet = {
-                id:id,
-                x : x,
-                y : y,
-                spdX : spdX,
-                spdY : spdY,
-                width : width,
-                height : height,
-                color:"black",
-                timer:0
-            }
-            
-            bulletList[id] = bullet;
-       }
-       
-       document.onclick = function(mouse){
-        if(player.attackCounter > 25){
-            RandomlyGenerateBullet(player);
-            player.attackCounter = 0;
-        }
-    }
-
-       document.oncontextmenu = function(mouse){
-
-            if(player.attackCounter > 50){
-                for(var angle = 0; angle < 360; angle++){
-                    RandomlyGenerateBullet(player, angle);
-                }
-            }
-            mouse.preventDefault();
-       }
-
-       document.onmousemove = function(mouse){
-           var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
-           var mouseY = mouse.clientY - document.getElementById('ctx').getBoundingClientRect().top;
-           
-            mouseX -= player.x;
-            mouseY -= player.y;
-
-           player.aimAngle = Math.atan2(mouseY / mouseX) / Math.PI * 180;
-           
-    }
-
-       document.onkeydown = function(event){
-           if(event.keyCode === 68){//d
-                player.pressingRight = true;
-           }
-           else if(event.keyCode === 83){//s
-                player.pressingDown = true;
-           }
-           else if(event.keyCode === 65){//a
-               player.pressingLeft = true;
-           }
-           else if(event.keyCode === 87){//w
-               player.pressingUp = true;
-           }
-    }
-
-       document.onkeyup = function(event){
-            if(event.keyCode === 68){//d
-                player.pressingRight = false;
-           }
-           else if(event.keyCode === 83){//s
-                player.pressingDown = false;
-           }
-           else if(event.keyCode === 65){//a
-               player.pressingLeft = false;
-           }
-           else if(event.keyCode === 87){//w
-               player.pressingUp = false;
-           }
-    }
-
-       UpdatePlayerPosition = function(){
-           if(player.pressingRight){
-                player.x += 10;
-           }
-           if(player.pressingDown){
-                player.y += 10;
-           }
-           if(player.pressingLeft){
-                player.x -= 10;
-           }
-           if(player.pressingUp){
-                player.y -= 10;
-           }
-
-            //isPositionValid
-
-            if(player.x < player.width/2){
-                player.x=player.width/2;
-            }
-            if(player.x > WIDTH - player.width/2){
-                player.x = WIDTH - player.width/2;
-            }
-            if(player.y < player.height/2){
-                player.y  = player.height/2;
-            }
-            if(player.y > HEIGHT-player.height/2){
-                player.y = HEIGHT - player.height/2;
-            }
-        }
-
-         UpdateEntity = function (entity){
-         UpdateEntityPosition(entity);
-         DrawEntity(entity);
-    }
-
-   
-    TestCollisionRectRect = function(rect1, rect2){
-           return    rect1.x <= rect2.x + rect2.width
-                  && rect2.x <= rect1.x + rect1.width
-                  && rect1.y <= rect2.y + rect2.height
-                  && rect2.y <= rect1.y + rect1.height; 
-       }
-
-
-
-    DrawEntity = function(entity){
-        ctx.save();
-        ctx.fillStyle = entity.color;
-        ctx.fillRect(entity.x-entity.width/2, entity.y-entity.height/2, entity.width, entity.height);
-        ctx.restore();
-    }
-
-   
-
-    UpdateEntityPosition = function(entity){
-        entity.x+= entity.spdX;
-        entity.y+= entity.spdY;
-
-        if( entity.x > WIDTH  || entity.x < 0){
-            entity.spdX = -entity.spdX;
-        }
-        if( entity.y > HEIGHT  || entity.y< 0){
-           entity. spdY = -entity.spdY;
-        }
-    }
-    
-
-     //Random Enenmy
-    RandomlyGenerateEnemy = function(){
+         //Randomly Enenmy
+       RandomlyGenerateEnemy = function(){
 
             var id = Math.random();
             var x = Math.random() * WIDTH/2;
@@ -266,48 +108,209 @@
             var height = 10 + Math.random()*30;
 
             CreateEnemy(id, x, y, spdX, spdY, width, height);
-    }
+       }
+       
+       //Create Upgrade
+       CreateUpgrade = function (id, x, y, spdX, spdY, width, height, color, category){
+            var upgrade = {
+                id:id,
+                x : x,
+                y : y,
+                spdX : spdX,
+                spdY : spdY,
+                width : width,
+                height : height,
+                color: color,
+                category:category,
+                name : 'E'
+            }
+            
+            upgradeList[id] = upgrade;
+       }
 
-    //Random Upgrade
-
-    RandomlyGenerateUpgrade = function(){
+       //Randomly Upgrade
+       RandomlyGenerateUpgrade = function(){
 
         var id = Math.random();
-        var x = Math.random() * WIDTH/2;
-        var y = Math.random() * HEIGHT/2;
+        var x = Math.random() * WIDTH;
+        var y = Math.random() * HEIGHT;
         var spdX = 0;
         var spdY = 0;
         var width = 10;
         var height = 10;
 
         if(Math.random()<0.5){
-            var category = 'low';
-            var color = 'orange';
+        var category = 'low';
+        var color = 'orange';
         }else{
-            var category = 'high';
-            var color = 'purple';
+        var category = 'high';
+        var color = 'purple';
         }
 
         CreateUpgrade(id, x, y, spdX, spdY, width, height, color, category);
-    }
+}
+       CreateBullet = function (id, x, y, spdX, spdY, width, height){
+            var bullet = {
+                id:id,
+                x : x,
+                y : y,
+                spdX : spdX,
+                spdY : spdY,
+                name: 'E',
+                width : width,
+                height : height,
+                color:"black",
+                timer:0
+            }
+            
+            bulletList[id] = bullet;
+       }
 
-    RandomlyGenerateBullet = function(actor, overwriteAngle){
-        var angle = actor.aimAngle;
+       //Randomly Bullet
+       RandomlyGenerateBullet = function(actor, overwriteAngle){
+        var x = player.x;
+        var y = player.y;
+        var height = 10;
+        var width = 10;
+        var id = Math.random();
+        
+        var angle;
         if(overwriteAngle !== undefined){
             angle = overwriteAngle;
+        }else{
+
+            angle = actor.aimAngle;
         }
-        var id = Math.random();
-        var x = actor.x;
-        var y = actor.y;
+        
         var spdX = Math.cos(angle/180*Math.PI)*5;
         var spdY =Math.sin(angle/180*Math.PI)*5;
-        var width = 10;
-        var height = 10;
 
         CreateBullet(id, x, y, spdX, spdY, width, height);
     }
-   
-   
+
+    UpdateEntity = function (entity){
+         UpdateEntityPosition(entity);
+         DrawEntity(entity);
+    }
+
+    UpdateEntityPosition = function(entity){
+        entity.x += entity.spdX;
+        entity.y+= entity.spdY;
+
+        if( entity.x > WIDTH  || entity.x < 0){
+            entity.spdX = -entity.spdX;
+        }
+        if( entity.y > HEIGHT  || entity.y< 0){
+           entity. spdY = -entity.spdY;
+        }
+    }
+    
+    TestCollisionRectRect = function(rect1, rect2){
+           return    rect1.x <= rect2.x + rect2.width
+                  && rect2.x <= rect1.x + rect1.width
+                  && rect1.y <= rect2.y + rect2.height
+                  && rect2.y <= rect1.y + rect1.height; 
+    }
+
+    DrawEntity = function(entity){
+        ctx.save();
+        ctx.fillStyle = entity.color;
+        ctx.fillRect(entity.x-entity.width/2, entity.y-entity.height/2, entity.width, entity.height);
+        ctx.restore();
+    }
+       
+    document.onclick = function(mouse){
+        if(player.attackCounter > 25){	//every 1 sec
+            player.attackCounter = 0;
+            RandomlyGenerateBullet(player);
+        }
+    }
+
+    document.oncontextmenu = function(mouse){
+
+        if(player.attackCounter > 50){
+            player.attackCounter = 0;
+            /* for(var angle = 0; angle < 360; angle++){
+                RandomlyGenerateBullet(player, angle);
+            }*/
+            RandomlyGenerateBullet(player, player.aimAngle - 5);
+            RandomlyGenerateBullet(player, player.aimAngle);
+            RandomlyGenerateBullet(player, player.aimAngle + 5);
+        }
+        mouse.preventDefault();
+    }
+
+    document.onmousemove = function(mouse){
+           var mouseX = mouse.clientX - document.getElementById('ctx').getBoundingClientRect().left;
+           var mouseY = mouse.clientY - document.getElementById('ctx').getBoundingClientRect().top;
+           
+            mouseX -= player.x;
+            mouseY -= player.y;
+
+           player.aimAngle = Math.atan2(mouseY, mouseX)/Math.PI * 180;
+           
+    }
+
+    document.onkeydown = function(event){
+        if(event.keyCode === 68){//d
+            player.pressingRight = true;
+        }
+        else if(event.keyCode === 83){//s
+            player.pressingDown = true;
+        }
+        else if(event.keyCode === 65){//a
+            player.pressingLeft = true;
+        }
+        else if(event.keyCode === 87){//w
+            player.pressingUp = true;
+        }
+    }
+
+    document.onkeyup = function(event){
+        if(event.keyCode === 68){//d
+            player.pressingRight = false;
+        }
+        else if(event.keyCode === 83){//s
+            player.pressingDown = false;
+        }
+        else if(event.keyCode === 65){//a
+            player.pressingLeft = false;
+        }
+        else if(event.keyCode === 87){//w
+            player.pressingUp = false;
+        }
+    }
+
+    UpdatePlayerPosition = function(){
+        if(player.pressingRight){
+            player.x += playerSpeed;
+        }
+        if(player.pressingDown){
+            player.y += playerSpeed;
+        }
+        if(player.pressingLeft){
+            player.x -= playerSpeed;
+        }
+        if(player.pressingUp){
+            player.y -= playerSpeed;
+        }
+
+        //isPositionValid
+
+        if(player.x < player.width/2){
+            player.x=player.width/2;
+        }
+        if(player.x > WIDTH - player.width/2){
+            player.x = WIDTH - player.width/2;
+        }
+        if(player.y < player.height/2){
+            player.y  = player.height/2;
+        }
+        if(player.y > HEIGHT-player.height/2){
+            player.y = HEIGHT - player.height/2;
+        }
+    }
+
     Update = function (){
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
         frameCount++;
@@ -388,6 +391,7 @@
         timeWhenGameStarted = Date.now();
         player.hp = HEALTH;
         frameCount = 0;
+        score = 0 ;
         enemyList={};
         upgradeList={};
         bulletList={};
@@ -398,8 +402,8 @@
 
    
        
-       StartNewGame();
-       setInterval(Update, 40);
+    StartNewGame();
+    setInterval(Update, 40);
 
 </script>
 </body>
