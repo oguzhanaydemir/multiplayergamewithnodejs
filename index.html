@@ -31,25 +31,119 @@
 
         //player
         var player;
-        CreatePlayer = function(){
-            player = {
-                type: 'player',
-                x: 50,
-                spdX: 30,
-                y: 40,
-                spdY: 5,
-                hp: HEALTH,
-                width: playerWidth,
-                height: playerHeight,
-                color: "green",
-                attackSpeed: 10,
-                attackCounter: 0,
-                pressingDown: false,
-                pressingUp: false,
-                pressingLeft: false,
-                pressingRight: false,
-                aimAngle: 0
+
+        CreateEntity = function(type, id, x, y, spdX, spdY, width, height, color){
+            var self = {
+                type: type,
+                x: x,
+                y: y,
+                spdX: spdX,
+                spdY: spdY,
+                width: width,
+                height: height,
+                color: color
+            };
+            
+            self.Update = function () {
+                self.UpdatePosition();
+                self.Draw();
             }
+
+            self.Draw = function () {
+            ctx.save();
+            ctx.fillStyle = self.color;
+            ctx.fillRect(self.x - self.width / 2, self.y - self.height / 2, self.width, self.height);
+            ctx.restore();
+        }
+
+            self.GetDistance = function (entity2) {
+                var vx = self.x - entity2.x;
+                var vy = self.y - entity2.y;
+
+                return Math.sqrt(vx * vx + vy * vy);
+            }
+
+            self.TestCollision = function (entity2) {
+                var rect1 = {
+                    x: self.x - self.width / 2,
+                    y: self.y - self.height / 2,
+                    width: self.width,
+                    height: self.height
+                }
+
+                var rect2 = {
+                    x: entity2.x - entity2.width / 2,
+                    y: entity2.y - entity2.height / 2,
+                    width: entity2.width,
+                    height: entity2.height
+                }
+
+                return TestCollisionRectRect(rect1, rect2);
+            }
+
+            
+            self.UpdatePosition = function () {
+                
+                if (self.type === 'player') {
+
+                    if (self.pressingRight) {
+                        self.x += playerSpeed;
+                    }
+                    if (self.pressingDown) {
+                        self.y += playerSpeed;
+                    }
+                    if (self.pressingLeft) {
+                        self.x -= playerSpeed;
+                    }
+                    if (self.pressingUp) {
+                        self.y -= playerSpeed;
+                    }
+
+                    //isPositionValid
+
+                    if (self.x < self.width / 2) {
+                        self.x = self.width / 2;
+                    }
+                    if (self.x > WIDTH - self.width / 2) {
+                        self.x = WIDTH - self.width / 2;
+                    }
+                    if (self.y < self.height / 2) {
+                        self.y = self.height / 2;
+                    }
+                    if (self.y > HEIGHT - self.height / 2) {
+                        self.y = HEIGHT - self.height / 2;
+                    }
+                }
+                else {
+                    self.x += self.spdX;
+                    self.y += self.spdY;
+
+                    if (self.x > WIDTH || self.x < 0) {
+                        self.spdX = -self.spdX;
+                    }
+                    if (self.y > HEIGHT || self.y < 0) {
+                        self.spdY = -self.spdY;
+                    }
+            }
+        }
+
+            return self;
+        }
+        CreatePlayer = function(){
+            var self = CreateEntity('player','player.id', 50, 30, 40, 5, playerWidth, playerHeight, "green");
+               
+                self.hp  = HEALTH;
+                self.attackSpeed = 10;
+                self.attackCounter = 0;
+                self.aimAngle= 0;
+                //
+                self.pressingDown  = false;
+                self.pressingUp    = false;
+                self.pressingLeft  = false;
+                self.pressingRight = false;
+
+                player = self;
+            
         }
 
 
@@ -61,51 +155,19 @@
 
         //get distance between player and enemy
 
-        GetDistanceBetweenEntity = function (entity1, entity2) {
-            var vx = entity1.x - entity2.x;
-            var vy = entity1.y - entity2.y;
-
-            return Math.sqrt(vx * vx + vy * vy);
-        }
-
-        TestCollisionEntity = function (entity1, entity2) {
-            var rect1 = {
-                x: entity1.x - entity1.width / 2,
-                y: entity1.y - entity1.height / 2,
-                width: entity1.width,
-                height: entity1.height
-            }
-
-            var rect2 = {
-                x: entity2.x - entity2.width / 2,
-                y: entity2.y - entity2.height / 2,
-                width: entity2.width,
-                height: entity2.height
-            }
-
-            return TestCollisionRectRect(rect1, rect2);
-        }
-
+        
 
 
         //Create Enemy
         CreateEnemy = function (id, x, y, spdX, spdY, width, height) {
-            var enemy = {
-                type: 'enemy',
-                id: id,
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                width: width,
-                height: height,
-                color: "red",
-                //
-                aimAngle: 0,
-                attackSpeed: 1,
-                attackCounter: 0
-            }
-            enemyList[id] = enemy;
+            var self = CreateEntity('enemy', id, x, y, spdX, spdY, width, height, 'red');
+            
+            self.hp  = HEALTH;
+            self.attackSpeed = 10;
+            self.attackCounter = 0;
+            self.aimAngle= 0;
+               
+            enemyList[id] = self;
         }
 
         //Randomly Enenmy
@@ -124,21 +186,11 @@
 
         //Create Upgrade
         CreateUpgrade = function (id, x, y, spdX, spdY, width, height, color, category) {
-            var upgrade = {
-                type: 'upgrade',
-                id: id,
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                width: width,
-                height: height,
-                color: color,
-                category: category,
-                name: 'E'
-            }
+            var self = CreateEntity('upgrade', id, x, y, spdX, spdY, width, height, color);
+            
+            self.category = category;
 
-            upgradeList[id] = upgrade;
+            upgradeList[id] = self;
         }
 
         //Randomly Upgrade
@@ -165,21 +217,11 @@
 
         //Create Bullet
         CreateBullet = function (id, x, y, spdX, spdY, width, height) {
-            var bullet = {
-                type: 'bullet',
-                id: id,
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                name: 'E',
-                width: width,
-                height: height,
-                color: "black",
-                timer: 0
-            }
+            var self = CreateEntity('bullet', id, x, y, spdX, spdY, width, height, 'black');
+            
+            self.timer = 0;
 
-            bulletList[id] = bullet;
+            bulletList[id] = self;
         }
 
         //Randomly Bullet
@@ -204,55 +246,9 @@
             CreateBullet(id, x, y, spdX, spdY, width, height);
         }
 
-        UpdateEntity = function (entity) {
-            UpdateEntityPosition(entity);
-            DrawEntity(entity);
-        }
+        
 
-        UpdateEntityPosition = function (entity) {
-            if (entity.type === 'player') {
-
-                if (player.pressingRight) {
-                    player.x += playerSpeed;
-                }
-                if (player.pressingDown) {
-                    player.y += playerSpeed;
-                }
-                if (player.pressingLeft) {
-                    player.x -= playerSpeed;
-                }
-                if (player.pressingUp) {
-                    player.y -= playerSpeed;
-                }
-
-                //isPositionValid
-
-                if (player.x < player.width / 2) {
-                    player.x = player.width / 2;
-                }
-                if (player.x > WIDTH - player.width / 2) {
-                    player.x = WIDTH - player.width / 2;
-                }
-                if (player.y < player.height / 2) {
-                    player.y = player.height / 2;
-                }
-                if (player.y > HEIGHT - player.height / 2) {
-                    player.y = HEIGHT - player.height / 2;
-                }
-            }
-
-            else {
-                entity.x += entity.spdX;
-                entity.y += entity.spdY;
-
-                if (entity.x > WIDTH || entity.x < 0) {
-                    entity.spdX = -entity.spdX;
-                }
-                if (entity.y > HEIGHT || entity.y < 0) {
-                    entity.spdY = -entity.spdY;
-                }
-            }
-        }
+        
 
         TestCollisionRectRect = function (rect1, rect2) {
             return rect1.x <= rect2.x + rect2.width
@@ -261,12 +257,7 @@
                 && rect2.y <= rect1.y + rect1.height;
         }
 
-        DrawEntity = function (entity) {
-            ctx.save();
-            ctx.fillStyle = entity.color;
-            ctx.fillRect(entity.x - entity.width / 2, entity.y - entity.height / 2, entity.width, entity.height);
-            ctx.restore();
-        }
+        
 
         document.onclick = function (mouse) {
             PerformAttack(player);
@@ -359,7 +350,7 @@
 
             for (var key in bulletList) {
                 var toRemove = false;
-                UpdateEntity(bulletList[key]);
+                bulletList[key].Update();
 
                 bulletList[key].timer++;
 
@@ -368,7 +359,7 @@
                 }
 
                 for (var enemyKey in enemyList) {
-                    var isColliding = TestCollisionEntity(bulletList[key], enemyList[enemyKey]);
+                    var isColliding = bulletList[key].TestCollision(enemyList[enemyKey]);
                     if (isColliding) {
                         toRemove = true;
                         delete enemyList[enemyKey];
@@ -382,8 +373,8 @@
             }
 
             for (var key in upgradeList) {
-                UpdateEntity(upgradeList[key]);
-                var isColliding = TestCollisionEntity(player, upgradeList[key]);
+                upgradeList[key].Update();
+                var isColliding = player.TestCollision(upgradeList[key]);
 
                 if (isColliding) {
 
@@ -397,9 +388,9 @@
             }
 
             for (var key in enemyList) {
-                UpdateEntity(enemyList[key]);
+                enemyList[key].Update();
 
-                var isColliding = TestCollisionEntity(player, enemyList[key]);
+                var isColliding = player.TestCollision(enemyList[key]);
 
                 if (isColliding) {
                     player.hp -= 1;
@@ -410,7 +401,7 @@
                     }
                 }
             }
-            UpdateEntity(player);
+            player.Update();
             ctx.fillText(player.hp + " Hp", 0, 30);
             ctx.fillText("Score :" + score, 200, 30);
         }
