@@ -1,7 +1,7 @@
  //player
  var player;
- var playerWidth = 20;
- var playerHeight = 20;
+ var playerWidth = 50;
+ var playerHeight = 70;
  var playerSpeed = 10;
 
 var enemyList = {};
@@ -28,9 +28,16 @@ var bulletList = {};
 
      self.Draw = function () {
          ctx.save();
-         var x = self.x - self.width / 2;
-         var y = self.y - self.height / 2;
-         ctx.drawImage(self.img, x, y);
+         var x = self.x - player.x;
+         var y = self.y - player.y;
+
+        x += WIDTH/2;
+        y += HEIGHT/2;
+
+        x -= self.width/2;
+        y -= self.height/2; 
+
+         ctx.drawImage(self.img, 0, 0, self.img.width, self.img.height, x, y, self.width, self.height );
          ctx.restore();
      }
 
@@ -193,8 +200,8 @@ var bulletList = {};
      var y = Math.random() * HEIGHT / 2;
      var spdX = 5 + Math.random() * 5;
      var spdY = 5 + Math.random() * 5;
-     var width = 10 + Math.random() * 30;
-     var height = 10 + Math.random() * 30;
+     var width = 64;//10 + Math.random() * 30;
+     var height = 64;//10 + Math.random() * 30;
 
      Enemy(id, x, y, spdX, spdY, width, height);
  }
@@ -232,8 +239,8 @@ var bulletList = {};
 
      var x = Math.random() * WIDTH;
      var y = Math.random() * HEIGHT;
-     var width = 10;
-     var height = 10;
+     var width = 32;
+     var height = 32;
      var id = Math.random();
      var spdX = 0;
      var spdY = 0;
@@ -286,8 +293,8 @@ var bulletList = {};
  GenerateBullet = function (actor, overwriteAngle) {
      var x = actor.x;
      var y = actor.y;
-     var height = 10;
-     var width = 10;
+     var height = 32;
+     var width = 32;
      var id = Math.random();
 
      var angle;
