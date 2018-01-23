@@ -181,12 +181,12 @@ var bulletList = {};
          super_update();
          self.PerformAttack();
 
-         var isColliding = player.TestCollision(self);
+        /* var isColliding = player.TestCollision(self);
 
          if (isColliding) {
              player.hp -= 1;
 
-         }
+         }*/
      }
 
      enemyList[id] = self;
@@ -258,11 +258,11 @@ var bulletList = {};
  }
 
  // Bullet
- Bullet = function (id, x, y, spdX, spdY, width, height) {
+ Bullet = function (id, x, y, spdX, spdY, width, height, combatType) {
      var self = Actor('bullet', id, x, y, spdX, spdY, width, height, Img.bullet, 0, 0);
 
      self.timer = 0;
-
+     self.combatType = combatType;
      var super_update = self.Update;
      self.Update = function () {
          super_update();
@@ -273,14 +273,19 @@ var bulletList = {};
              toRemove = true;
          }
 
-         for (var enemyKey in enemyList) {
-             /*  var isColliding = self.TestCollision(enemyList[enemyKey]);
-               if (isColliding) {
-                   toRemove = true;
-                   delete enemyList[enemyKey];
-                   break;
-               }*/
-         }
+         if(self.combatType === 'player'){
+            for (var enemyKey in enemyList) {
+                  if (self.TestCollision(enemyList[enemyKey])) {
+                      toRemove = true;
+                      delete enemyList[enemyKey];
+                  }
+            }
+         }else if(self.combatType === 'enemy'){
+            if (self.TestCollision(player)){
+                player.hp -= 1;
+                toRemove = true;
+            }
+          }
 
          if (toRemove) {
              delete bulletList[self.id];
@@ -309,5 +314,5 @@ var bulletList = {};
      var spdX = Math.cos(angle / 180 * Math.PI) * 5;
      var spdY = Math.sin(angle / 180 * Math.PI) * 5;
 
-     Bullet(id, x, y, spdX, spdY, width, height);
+     Bullet(id, x, y, spdX, spdY, width, height, actor.type);
  }
