@@ -70,10 +70,10 @@ var bulletList = {};
          self.x += self.spdX;
          self.y += self.spdY;
 
-         if (self.x > WIDTH || self.x < 0) {
+         if (self.x > currentMap.width || self.x < 0) {
              self.spdX = -self.spdX;
          }
-         if (self.y > HEIGHT || self.y < 0) {
+         if (self.y > currentMap.height || self.y < 0) {
              self.spdY = -self.spdY;
          }
      }
@@ -107,14 +107,14 @@ var bulletList = {};
          if (self.x < self.width / 2) {
              self.x = self.width / 2;
          }
-         if (self.x > WIDTH - self.width / 2) {
-             self.x = WIDTH - self.width / 2;
+         if (self.x > currentMap.width - self.width / 2) {
+             self.x = currentMap.width - self.width / 2;
          }
          if (self.y < self.height / 2) {
              self.y = self.height / 2;
          }
-         if (self.y > HEIGHT - self.height / 2) {
-             self.y = HEIGHT - self.height / 2;
+         if (self.y > currentMap.height - self.height / 2) {
+             self.y = currentMap.height - self.height / 2;
          }
      }
 
@@ -195,9 +195,10 @@ var bulletList = {};
  //Randomly Enenmy
  RandomlyGenerateEnemy = function () {
 
-     var id = Math.random();
-     var x = Math.random() * WIDTH / 2;
-     var y = Math.random() * HEIGHT / 2;
+	 
+    var id = Math.random();
+     var x = Math.random() * currentMap.width ;
+     var y = Math.random() * currentMap.height;
      var spdX = 5 + Math.random() * 5;
      var spdY = 5 + Math.random() * 5;
      var width = 64;//10 + Math.random() * 30;
@@ -237,8 +238,8 @@ var bulletList = {};
  //Randomly Upgrade
  RandomlyGenerateUpgrade = function () {
 
-     var x = Math.random() * WIDTH;
-     var y = Math.random() * HEIGHT;
+     var x = Math.random() * currentMap.width;
+     var y = Math.random() * currentMap.height;
      var width = 32;
      var height = 32;
      var id = Math.random();
