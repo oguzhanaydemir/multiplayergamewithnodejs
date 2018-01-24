@@ -24,7 +24,7 @@
 
 
         var frameCount = 0;
-
+        var paused = false;
         var score = 0;
 
         // Loading the image (in Memory)
@@ -83,6 +83,9 @@
             else if (event.keyCode === 87) {//w
                 player.pressingUp = true;
             }
+            else if (event.keyCode === 80) {//p
+                paused = !paused;
+            }
         }
 
         document.onkeyup = function (event) {
@@ -101,8 +104,13 @@
         }
 
         Update = function () {
+            if(paused){
+                ctx.fillText('PAUSED', WIDTH/2 -15, HEIGHT/2);
+                return;
+            }
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             currentMap.Draw();
+
             frameCount++;
             score++;
 
@@ -141,32 +149,33 @@
                 }
 
                 if (toRemove) {
-                    delete b;
+                    delete bulletList[key];
                 }
             }
 
             for (var key in upgradeList) {
-                upgradeList[key].Update();
-                var isColliding = player.TestCollision(upgradeList[key]);
+                var u = upgradeList[key];
+                u.Update();
+                var isColliding = player.TestCollision(u);
 
                 if (isColliding) {
 
-                    if (self.category === 'score') {
+                    if (u.category === 'score') {
                         score += 1000;
                     }
-                    if (self.category === 'attack-speed') {
+                    if (u.category === 'attack-speed') {
                         player.attackSpeed += 3;
                     }
-                    console.log(self.id);
-                    delete upgradeList[self.id];
+                    delete upgradeList[key];
                 }
             }
+           
 
             for (var key in enemyList) {
                 enemyList[key].Update();
                 enemyList[key].PerformAttack();
             }
-            if (self.hp <= 0) {
+            if (player.hp <= 0) {
                 var timeSurvived = Date.now() - timeWhenGameStarted;
                 console.log('Your score is ' + timeSurvived);
                 StartNewGame();
