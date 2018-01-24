@@ -14,24 +14,21 @@
     <canvas id="ctx" width="500" height="500" style="border:1px solid black;"></canvas>
 
     <script>
+        var ctx = document.getElementById("ctx").getContext('2d');
+        ctx.font = '30px Arial';
 
         const HEIGHT = 500;
         const WIDTH = 500;
         const HEALTH = 10;
-
         var timeWhenGameStarted = Date.now();
 
-        var ctx = document.getElementById("ctx").getContext('2d');
-
-        ctx.font = '30px Arial';
 
         var frameCount = 0;
+
         var score = 0;
 
-        // Loading the image (im Memory)
-
+        // Loading the image (in Memory)
         var Img = {};
-
         Img.player = new Image();
         Img.player.src = "images/player.png";
         Img.enemy = new Image();
@@ -44,7 +41,7 @@
         Img.upgrade2.src = "images/upgrade2.png";
         Img.map = new Image();
         Img.map.src = "images/map.png";
-        //
+
 
         TestCollisionRectRect = function (rect1, rect2) {
             return rect1.x <= rect2.x + rect2.width
@@ -119,15 +116,60 @@
             }
 
             for (var key in bulletList) {
-                bulletList[key].Update();
+                var b = bulletList[key];
+                b.Update();
+
+                var toRemove = false;
+                b.timer++;
+
+                if (b.timer > 75) {
+                    toRemove = true;
+                }
+
+                if (b.combatType === 'player') {
+                    for (var enemyKey in enemyList) {
+                        if (b.TestCollision(enemyList[enemyKey])) {
+                            toRemove = true;
+                            delete enemyList[enemyKey];
+                        }
+                    }
+                } else if (b.combatType === 'enemy') {
+                    if (b.TestCollision(player)) {
+                        player.hp -= 1;
+                        toRemove = true;
+                    }
+                }
+
+                if (toRemove) {
+                    delete b;
+                }
             }
 
             for (var key in upgradeList) {
                 upgradeList[key].Update();
+                var isColliding = player.TestCollision(upgradeList[key]);
+
+                if (isColliding) {
+
+                    if (self.category === 'score') {
+                        score += 1000;
+                    }
+                    if (self.category === 'attack-speed') {
+                        player.attackSpeed += 3;
+                    }
+                    console.log(self.id);
+                    delete upgradeList[self.id];
+                }
             }
 
             for (var key in enemyList) {
                 enemyList[key].Update();
+                enemyList[key].PerformAttack();
+            }
+            if (self.hp <= 0) {
+                var timeSurvived = Date.now() - timeWhenGameStarted;
+                console.log('Your score is ' + timeSurvived);
+                StartNewGame();
             }
             player.Update();
             ctx.fillText(player.hp + " Hp", 0, 30);
@@ -147,7 +189,7 @@
             RandomlyGenerateEnemy();
         }
 
-        
+
 
 
 
