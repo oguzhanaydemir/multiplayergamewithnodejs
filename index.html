@@ -31,8 +31,10 @@
         var Img = {};
         Img.player = new Image();
         Img.player.src = "images/player.png";
-        Img.enemy = new Image();
-        Img.enemy.src = "images/enemy.png";
+        Img.bat = new Image();
+        Img.bat.src = "images/bat.png";
+        Img.bee = new Image();
+        Img.bee.src = "images/bee.png";
         Img.bullet = new Image();
         Img.bullet.src = "images/bullet.png";
         Img.upgrade1 = new Image();
@@ -114,7 +116,9 @@
             frameCount++;
             score++;
 
-            
+            UpdateBullet();
+            UpdateUpgrade();
+            UpdateEnemy();
            
             player.Update();
             ctx.fillText(player.hp + " Hp", 0, 30);
