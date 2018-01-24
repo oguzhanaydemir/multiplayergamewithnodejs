@@ -1,4 +1,8 @@
- //player
+/*var timeSurvived = Date.now() - timeWhenGameStarted;
+console.log('Your score is ' + timeSurvived);
+StartNewGame();*/
+ 
+ 
  var player;
  var playerWidth = 50;
  var playerHeight = 70;
@@ -110,7 +114,11 @@ var bulletList = {};
          }
      
 
-  
+         self.OnDeath = function(){
+            var timeSurvived = Date.now() - timeWhenGameStarted;
+            console.log('Your score is ' + timeSurvived);
+            StartNewGame();
+         }
      }
 
      return self;
@@ -151,13 +159,14 @@ var bulletList = {};
 
      }
 
+     self.OnDeath = function(){};
 
      return self;
  }
 
  // Enemy
- Enemy = function (id, x, y,  width, height) {
-     var self = Actor('enemy', id, x, y, width, height, Img.enemy, 10, 1);
+ Enemy = function (id, x, y,  width, height, img, hp, attackSpeed) {
+     var self = Actor('enemy', id, x, y, width, height, img, hp, attackSpeed);
      enemyList[id] = self;
 
      var super_update = self.Update;
@@ -189,6 +198,12 @@ var bulletList = {};
             self.y -= 3;
 
     }
+
+    self.OnDeath = function(){
+        console.log(enemyList[key]);
+        console.log(JSON.stringify[enemyList]);
+        delete enemyList[key];
+    }
  }
 
  //Randomly Enenmy
@@ -201,7 +216,7 @@ var bulletList = {};
      var width = 64;
      var height = 64;
 
-     Enemy(id, x, y, width, height);
+     Enemy(id, x, y, width, height, Img.enemy, 10, 1);
  }
 
 
