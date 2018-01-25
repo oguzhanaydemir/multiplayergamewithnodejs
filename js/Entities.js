@@ -1,16 +1,7 @@
-/*var timeSurvived = Date.now() - timeWhenGameStarted;
-console.log('Your score is ' + timeSurvived);
-StartNewGame();*/
-
-
 var player;
 var playerWidth = 50;
 var playerHeight = 70;
 var playerSpeed = 10;
-
-var enemyList = {};
-var upgradeList = {};
-var bulletList = {};
 
 Entity = function (type, id, x, y, width, height, img) {
     var self = {
@@ -70,9 +61,7 @@ Entity = function (type, id, x, y, width, height, img) {
     }
 
 
-    self.UpdatePosition = function () {
-
-    }
+    self.UpdatePosition = function () {}
 
     return self;
 }
@@ -80,6 +69,15 @@ Entity = function (type, id, x, y, width, height, img) {
 Player = function () {
     var self = Actor('player', 'player.id', 50, 30, playerWidth, playerHeight, Img.player, HEALTH, 1);
 
+    var super_update = self.Update;
+
+    self.Update = function(){
+        super_update();
+        if(self.pressingMouseLeft)
+            self.PerformAttack();
+        if(self.pressingMouseRight)
+            self.PerformSpecialAttack();
+    }
     self.UpdatePosition = function () {
         if (self.pressingRight) {
             self.x += playerSpeed;
@@ -99,14 +97,14 @@ Player = function () {
         if (self.x < self.width / 2) {
             self.x = self.width / 2;
         }
-        if (self.x > currentMap.width - self.width / 2) {
-            self.x = currentMap.width - self.width / 2;
+        if (self.x > Maps.Current.width - self.width / 2) {
+            self.x = Maps.Current.width - self.width / 2;
         }
         if (self.y < self.height / 2) {
             self.y = self.height / 2;
         }
-        if (self.y > currentMap.height - self.height / 2) {
-            self.y = currentMap.height - self.height / 2;
+        if (self.y > Maps.Current.height - self.height / 2) {
+            self.y = Maps.Current.height - self.height / 2;
         }
 
     }
@@ -122,6 +120,9 @@ Player = function () {
     self.pressingLeft = false;
     self.pressingRight = false;
     
+    self.pressingMouseLeft = false;
+    self.pressingMouseRight = false;
+    
     return self;
 
 }
@@ -130,6 +131,7 @@ Actor = function (type, id, x, y, width, height, img, hp, attackSpeed) {
     var self = Entity(type, id, x, y, width, height, img);
 
     self.hp = hp;
+    self.hpMax = hp;
     self.attackSpeed = attackSpeed;
     self.attackCounter = 0;
     self.aimAngle = 0;
@@ -145,12 +147,12 @@ Actor = function (type, id, x, y, width, height, img, hp, attackSpeed) {
         }
     }
 
-    self.OnDeath = function () { };
+    self.OnDeath = function () {};
     
     self.PerformAttack = function () {
         if (self.attackCounter > 25) {	//every 1 sec
             self.attackCounter = 0;
-            GenerateBullet(self);
+            Bullet.Generate(self);
         }
     }
 
@@ -159,11 +161,11 @@ Actor = function (type, id, x, y, width, height, img, hp, attackSpeed) {
         if (self.attackCounter > 50) {
             self.attackCounter = 0;
             /* for(var angle = 0; angle < 360; angle++){
-                GenerateBullet(player, angle);
+                Bullet.Generate(player, angle);
             }*/
-            GenerateBullet(self, self.aimAngle - 5);
-            GenerateBullet(self, self.aimAngle);
-            GenerateBullet(self, self.aimAngle + 5);
+            Bullet.Generate(self, self.aimAngle - 5);
+            Bullet.Generate(self, self.aimAngle);
+            Bullet.Generate(self, self.aimAngle + 5);
         }
 
     }
@@ -174,7 +176,7 @@ Actor = function (type, id, x, y, width, height, img, hp, attackSpeed) {
 // Enemy
 Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
     var self = Actor('enemy', id, x, y, width, height, img, hp, attackSpeed);
-    enemyList[id] = self;
+    Enemy.list[id] = self;
 
     self.toRemove = false;
 
@@ -183,6 +185,7 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
     self.Update = function () {
         super_update();
         self.UpdateAim();
+        self.PerformAttack();
     }
 
     self.UpdateAim = function () {
@@ -190,6 +193,29 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
         var diffY = player.y - self.y;
 
         self.aimAngle = Math.atan2(diffY, diffX) / Math.PI * 180;
+    }
+    var super_draw = self.Draw;
+    self.Draw = function(){
+        super_draw();
+
+        var x = self.x - player.x +  WIDTH / 2;
+        var y = self.y - player.y + HEIGHT / 2 - self.height/2 - 20;
+
+      ctx.save();
+      ctx.fillStyle = 'red';
+      var width = 100 * self.hp/self.hpMax;
+      if(width < 0){
+          width = 0;
+      }
+      ctx.fillRect(x-50, y, width, 10); 
+      
+      ctx.strokeStyle = 'black';
+      ctx.strokeRect(x-50, y, 100, 10);
+      ctx.restore();
+   
+    }
+    self.OnDeath = function () {
+        self.toRemove = true;
     }
 
     self.UpdatePosition = function () {
@@ -208,18 +234,28 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
 
     }
 
-    self.OnDeath = function () {
-        self.toRemove = true;
+    
+}
+Enemy.list = {};
+Enemy.Update = function () {
+    if (frameCount % 100 === 0) {
+        Enemy.RandomlyGenerateEnemy();
+    }
+    for (var key in Enemy.list) {
+        Enemy.list[key].Update();
+    }
+    for (var key in Enemy.list) {
+        if(Enemy.list[key].toRemove){
+            delete Enemy.list[key];
+        }
     }
 }
-
-//Randomly Enenmy
-RandomlyGenerateEnemy = function () {
+Enemy.RandomlyGenerateEnemy = function () {
 
 
     var id = Math.random();
-    var x = Math.random() * currentMap.width;
-    var y = Math.random() * currentMap.height;
+    var x = Math.random() * Maps.Current.width;
+    var y = Math.random() * Maps.Current.height;
     var width = 64;
     var height = 64;
 
@@ -229,26 +265,41 @@ RandomlyGenerateEnemy = function () {
         Enemy(id, x, y, width, height, Img.bee, 1, 3);
 
 }
-
-
+//------------------//
+//
+// Upgrade
 Upgrade = function (id, x, y, width, height, img, category) {
     var self = Entity('upgrade', id, x, y, width, height, img);
-
-
-    var super_update = self.Update;
-    self.Update = function () {
-        super_update();
-    }
-
+    
     self.category = category;
-    upgradeList[id] = self;
+    Upgrade.list[id] = self;
 }
+Upgrade.list = {};
+Upgrade.Update = function () {
+    if (frameCount % 75 === 0) {
+        Upgrade.RandomlyGenerateUpgrade();
 
-//Randomly Upgrade
-RandomlyGenerateUpgrade = function () {
+    }
+    for (var key in Upgrade.list) {
+        Upgrade.list[key].Update();
+        var isColliding = player.TestCollision(Upgrade.list[key]);
 
-    var x = Math.random() * currentMap.width;
-    var y = Math.random() * currentMap.height;
+        if (isColliding) {
+
+            if (Upgrade.list[key].category === 'score') {
+                score += 1000;
+            }
+            if (Upgrade.list[key].category === 'attack-speed') {
+                player.attackSpeed += 3;
+            }
+            delete Upgrade.list[key];
+        }
+    }
+}
+Upgrade.RandomlyGenerateUpgrade = function () {
+
+    var x = Math.random() * Maps.Current.width;
+    var y = Math.random() * Maps.Current.height;
     var width = 32;
     var height = 32;
     var id = Math.random();
@@ -264,7 +315,8 @@ RandomlyGenerateUpgrade = function () {
 
     Upgrade(id, x, y, width, height, img, category);
 }
-
+//------------------//
+//
 // Bullet
 Bullet = function (id, x, y, spdX, spdY, width, height, combatType) {
     var self = Entity('bullet', id, x, y, width, height, Img.bullet);
@@ -280,19 +332,49 @@ Bullet = function (id, x, y, spdX, spdY, width, height, combatType) {
         self.x += self.spdX;
         self.y += self.spdY;
 
-        if (self.x > currentMap.width || self.x < 0) {
+        if (self.x > Maps.Current.width || self.x < 0) {
             self.spdX = -self.spdX;
         }
-        if (self.y > currentMap.height || self.y < 0) {
+        if (self.y > Maps.Current.height || self.y < 0) {
             self.spdY = -self.spdY;
         }
     }
 
-    bulletList[id] = self;
+    Bullet.list[id] = self;
 }
+Bullet.list = {};
+Bullet.Update = function () {
+    for (var key in Bullet.list) {
+        var b = Bullet.list[key];
+        b.Update();
 
-//Randomly Bullet
-GenerateBullet = function (actor, overwriteAngle) {
+        var toRemove = false;
+        b.timer++;
+
+        if (b.timer > 75) {
+            toRemove = true;
+        }
+
+        if (b.combatType === 'player') {
+            for (var enemyKey in Enemy.list) {
+                if (b.TestCollision(Enemy.list[enemyKey])) {
+                    toRemove = true;
+                   Enemy.list[enemyKey].hp -= 1;
+                }
+            }
+        } else if (b.combatType === 'enemy') {
+            if (b.TestCollision(player)) {
+                toRemove = true;
+                player.hp -= 1;
+            }
+        }
+
+        if (toRemove) {
+            delete Bullet.list[key];
+        }
+    }
+}
+Bullet.Generate = function (actor, overwriteAngle) {
     var x = actor.x;
     var y = actor.y;
     var height = 16;
@@ -312,4 +394,4 @@ GenerateBullet = function (actor, overwriteAngle) {
 
     Bullet(id, x, y, spdX, spdY, width, height, actor.type);
 }
-
+//------------------//
