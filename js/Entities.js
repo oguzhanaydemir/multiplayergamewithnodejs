@@ -82,6 +82,9 @@ Player = function () {
             self.PerformSpecialAttack();
     }
     self.UpdatePosition = function () {
+        var oldX = self.x;
+		var oldY = self.y;
+        
         if (self.pressingRight) {
             self.x += playerSpeed;
         }
@@ -108,6 +111,11 @@ Player = function () {
         }
         if (self.y > Maps.Current.height - self.height / 2) {
             self.y = Maps.Current.height - self.height / 2;
+        }
+
+        if(Maps.Current.IsPositionWall(self)){
+            self.x = oldX;
+            self.y = oldY;
         }
 
     }
@@ -258,6 +266,9 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
     }
 
     self.UpdatePosition = function () {
+        var oldX = self.x;
+        var oldY = self.y;
+        
         var diffX = player.x - self.x;
         var diffY = player.y - self.y;
 
@@ -270,6 +281,10 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
             self.y += 3;
         else
             self.y -= 3;
+        if(Maps.Current.IsPositionWall(self)){
+            self.x = oldX;
+            self.y = oldY;
+        }
 
     }
 
@@ -408,6 +423,10 @@ Bullet.Update = function () {
             }
         }
 
+        if(Maps.Current.IsPositionWall(b)){
+			toRemove = true;
+        }
+        
         if (toRemove) {
             delete Bullet.list[key];
         }
