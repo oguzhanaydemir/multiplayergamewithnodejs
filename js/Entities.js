@@ -73,6 +73,9 @@ Player = function () {
 
     self.Update = function(){
         super_update();
+        if(self.pressingRight || self.pressingDown || self.pressingLeft || self.pressingUp){
+            self.spriteAnimCounter += 0.2;
+        }
         if(self.pressingMouseLeft)
             self.PerformAttack();
         if(self.pressingMouseRight)
@@ -136,12 +139,48 @@ Actor = function (type, id, x, y, width, height, img, hp, attackSpeed) {
     self.attackCounter = 0;
     self.aimAngle = 0;
 
+    self.spriteAnimCounter = 0;
+    self.Draw = function () {
+        ctx.save();
+        var x = self.x - player.x;
+        var y = self.y - player.y;
+
+        x += WIDTH / 2;
+        y += HEIGHT / 2;
+
+        x -= self.width / 2;
+        y -= self.height / 2;
+
+        var frameWidth  = self.img.width/3;
+        var frameHeight = self.img.height/4;
+
+        var aimAngle = self.aimAngle;
+        if(aimAngle < 0){
+            aimAngle = 360 + aimAngle;
+        }
+
+        var directionMod = 3;
+        if(aimAngle >= 45 && aimAngle < 135){
+            directionMod = 2;
+        }
+        else if(aimAngle >= 135 && aimAngle < 225){
+            directionMod = 1;
+        }
+        else if(aimAngle >= 225 && aimAngle < 315){
+            directionMod = 0;
+        }
+
+        var walkingMod = Math.floor(self.spriteAnimCounter) % 3;
+        
+        ctx.drawImage(self.img, walkingMod * frameWidth, directionMod * frameHeight, frameWidth, frameHeight, x, y, self.width, self.height);
+        ctx.restore();
+    }
+
     var super_update = self.Update;
 
     self.Update = function () {
         super_update();
         self.attackCounter += self.attackSpeed;
-
         if (self.hp <= 0) {
             self.OnDeath();
         }
@@ -184,6 +223,7 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
 
     self.Update = function () {
         super_update();
+        self.spriteAnimCounter += 0.2;
         self.UpdateAim();
         self.PerformAttack();
     }
@@ -197,7 +237,6 @@ Enemy = function (id, x, y, width, height, img, hp, attackSpeed) {
     var super_draw = self.Draw;
     self.Draw = function(){
         super_draw();
-
         var x = self.x - player.x +  WIDTH / 2;
         var y = self.y - player.y + HEIGHT / 2 - self.height/2 - 20;
 
@@ -377,8 +416,8 @@ Bullet.Update = function () {
 Bullet.Generate = function (actor, overwriteAngle) {
     var x = actor.x;
     var y = actor.y;
-    var height = 16;
-    var width = 16;
+    var height = 32;
+    var width = 32;
     var id = Math.random();
 
     var angle;
